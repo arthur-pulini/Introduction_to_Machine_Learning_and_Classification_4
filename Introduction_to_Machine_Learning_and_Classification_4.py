@@ -1,8 +1,9 @@
 import pandas as pd
-import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.svm import SVC
+import graphviz
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
@@ -39,13 +40,16 @@ y = datas['sold']
 
 rawTrainX, rawTestX, trainY, testY = train_test_split(x, y, test_size = 0.25, stratify = y)
 
-scaler = StandardScaler()
-scaler.fit(rawTrainX)
-trainX = scaler.transform(rawTrainX)
-testX = scaler.transform(rawTestX)
-
-model = SVC(gamma='auto')
-model.fit(trainX, trainY)
-predictions = model.predict(testX)
+model = DecisionTreeClassifier(max_depth = 3)
+model.fit(rawTrainX, trainY)
+predictions = model.predict(rawTestX)
 accuracyScore = accuracy_score(testY, predictions)
 print("The accuracy was: %.2f " % (accuracyScore * 100))
+
+features = x.columns
+dotData = export_graphviz(model, out_file=None,
+                          filled = True, rounded = True,
+                          class_names = ['no', 'yes'],
+                          feature_names = features)
+grafico = graphviz.Source(dotData)
+grafico.view()
