@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import graphviz
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import export_graphviz
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from datetime import datetime
+from sklearn.dummy import DummyClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 SEED = 5
 np.random.seed(SEED)
@@ -38,7 +40,34 @@ print(head)
 x = datas[['price', 'model_age', 'Kilometers_per_year']]
 y = datas['sold']
 
+trainX, testX, trainY, testY = train_test_split(x, y, test_size = 0.25, stratify = y)
+
+model = LinearSVC()
+model.fit(trainX, trainY)
+predictions = model.predict(testX)
+
+accuracyScore = accuracy_score(testY, predictions) * 100
+print("%.2f%%" % accuracyScore)
+
+dummy_stratified = DummyClassifier()
+dummy_stratified.fit(trainX, trainY)
+dummyAccuracy = dummy_stratified.score(testX, testY) * 100
+
+print("%.2f%%" % dummyAccuracy)
+
 rawTrainX, rawTestX, trainY, testY = train_test_split(x, y, test_size = 0.25, stratify = y)
+
+scaler = StandardScaler()
+scaler.fit(rawTrainX)
+trainX = scaler.transform(rawTrainX)
+testX = scaler.transform(rawTestX)
+
+model = SVC()
+model.fit(trainX, trainY)
+predictions = model.predict(testX)
+
+accuracySVC = accuracy_score(testY, predictions) * 100
+print("%.2f%%" % accuracySVC)
 
 model = DecisionTreeClassifier(max_depth = 3)
 model.fit(rawTrainX, trainY)
